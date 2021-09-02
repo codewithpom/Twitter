@@ -34,6 +34,10 @@ app.get("/profile/:screen_name", (req, res) => {
     })
 })
 
+app.get("/profile", ((req, res) => {
+    res.sendFile(__dirname + "/frontend/profile.html")
+}))
+
 app.listen(port, "localhost", () => {
     console.log(`app listening on port ${port}`)
 })

@@ -1,10 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-$END$
+
+<div class="container">
+    <br>
+    <h2 style="text-align: center">What is the user name of that Twitter Account</h2>
+    <br>
+    <div id="form">
+        <div class="form-group">
+            <label for="username">Username (Screen Name)</label>
+            <input type="text" class="form-control" id="username" placeholder="Enter username" name="email">
+        </div>
+        <br>
+        <div style="text-align: center;">
+            <button id="submit" class="btn btn-primary">Get the BIO</button>
+        </div>
+        <br>
+        <div class="alert alert-danger" role="alert" style="display: none">
+            Fill the username box first
+        </div>
+
+        <div id="username_error" class="alert alert-danger" role="alert" style="display: none">
+            Wrong Username Please try by another user name
+        </div>
+
+    </div>
+    <br>
+    <br>
+    <div style="text-align: center;display: none" id="banner_div">
+        <img src="https://pbs.twimg.com/profile_banners/2907739345/1630496556" class="img-fluid" alt="banner" id="banner">
+    </div>
+    <br>
+    <br>
+
+    <div style="text-align: center;display: none" id="profile_div">
+        <img src="" alt="Profile Photo" class="img-fluid rounded-circle" id="profile">
+    </div>
+    <table class="table table-striped" style="display: none">
+        <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
 </body>
+
+<script>
+    function convert_tag(key, value) {
+        return `\n            <tr>\n                <th scope="row">\n                    ${key}\n                </th>\n                <td>\n                    ${value.replace("\n", "<br>")}\n</td>\n            </tr>`;
+    }
+    const tbody = document.getElementsByTagName("tbody")[0];
+    const submit_button = document.getElementById("submit");
+    submit_button.addEventListener("click", function (){
+        const account = document.getElementById("username").value;
+        if (account.replace(" ", "") === ""){
+            document.getElementsByClassName("alert alert-danger")[0].style.visibility = "";
+            return "";
+
+        }else {
+            document.getElementsByClassName("alert alert-danger")[0].style.visibility = "none";
+        }
+
+        $.get(`/profile/${account}`, function (data, err) {
+            if (err) {
+                console.log("Error")
+            }
+
+            if ('error' in data.keys()){
+                document.getElementById("username_error").style.display = "";
+                return ""
+            }else {
+                document.getElementById("username_error").style.display = "none";
+            }
+            let total_data = [];
+            total_data.push(convert_tag("Name", data['name']));
+            total_data.push(convert_tag("Location", data['location']));
+            total_data.push(convert_tag("Description", data['description']));
+            total_data.push(convert_tag("Website Link", `<a href=${data['url']}>${data['entities']}</a>`));
+            total_data.push(convert_tag("Followers Number", String(data['followers_count'])));
+            total_data.push(convert_tag("Created at", data['created_at']));
+            tbody.innerHTML = "";
+            for (const totalDatum of total_data) {
+                tbody.innerHTML += totalDatum;
+            }
+            document.getElementById("profile_div").style.display = ""
+            document.getElementById("banner_div").style.display = ""
+            document.getElementById("")
+        })
+
+    })
+</script>
 </html>
