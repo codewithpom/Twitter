@@ -23,6 +23,11 @@
         <br>
         <div style="text-align: center;">
             <button id="submit" class="btn btn-primary">Get the BIO</button>
+            <br>
+            <br>
+            <button class="btn btn-primary" style="display: none" id="export">
+                Export as Excel
+            </button>
         </div>
         <br>
         <div class="alert alert-danger" role="alert" style="display: none">
@@ -59,6 +64,8 @@
 
         </tbody>
     </table>
+
+
 </div>
 
 </body>
@@ -72,6 +79,7 @@
     const submit_button = document.getElementById("submit");
     submit_button.addEventListener("click", function (){
         const account = document.getElementById("username").value;
+        window.account = account;
         if (account.replace(" ", "") === ""){
             document.getElementsByClassName("alert alert-danger")[0].style.visibility = "";
             return "";
@@ -115,9 +123,63 @@
                     document.getElementById("banner").src = data['profile_banner_url'];
                 }
                 tbody.parentElement.style.display = "";
+                document.getElementById("export").style.display = "";
             }
 
         })
     })
+</script>
+
+<script>
+    function downloadCSV(csv, filename) {
+        let csvFile;
+        let downloadLink;
+
+        // csv file
+        csvFile = new Blob([csv], { type: 'text/csv' });
+
+        // Download link
+        downloadLink = document.createElement('a');
+
+        // File name
+        downloadLink.download = filename;
+
+        // Create a link to the file
+        downloadLink.href = URL.createObjectURL(csvFile);
+
+        // Hide download link
+        downloadLink.style.display = "none";
+
+        // Add the link to DOM
+        document.body.appendChild(downloadLink);
+
+        // Click download link
+        downloadLink.click();
+    }
+
+    function exportTableToCSV(filename, separator) {
+        const csv = [];
+        const rows = document.querySelectorAll("table tr");
+
+        for (let i = 0; i < rows.length; i++) {
+
+            let row = [];
+
+            const cols = rows[i].querySelectorAll("td, th");
+
+            for (let j = 0; j < cols.length; j++)
+                // Add double quote to make the value stay in the same column if is separated by comma
+                row.push(`"${cols[j].innerText}"`);
+
+            csv.push(row.join(separator));
+        }
+
+        // Download CSV file
+        downloadCSV(csv.join("\n"), filename);
+    }
+
+    document.querySelector('#export').addEventListener('click', () => {
+        exportTableToCSV(`${window.account} BIO.csv`, ',');
+    });
 </script>
 </html>
