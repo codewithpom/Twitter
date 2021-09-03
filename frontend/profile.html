@@ -30,21 +30,24 @@
         </div>
 
         <div id="username_error" class="alert alert-danger" role="alert" style="display: none">
-            Wrong Username Please try by another user name
+            <div style="text-align: center">
+                Wrong Username Please try by another user name
+            </div>
         </div>
 
     </div>
     <br>
     <br>
     <div style="text-align: center;display: none" id="banner_div">
-        <img src="https://pbs.twimg.com/profile_banners/2907739345/1630496556" class="img-fluid" alt="banner" id="banner">
+        <img src="" class="img-fluid" alt="banner" id="banner">
     </div>
     <br>
     <br>
 
     <div style="text-align: center;display: none" id="profile_div">
-        <img src="" alt="Profile Photo" class="img-fluid rounded-circle" id="profile">
+        <img src="" style="width: 100px;height: 100px" alt="Profile Photo" class="img-fluid rounded-circle" id="profile">
     </div>
+    <br>
     <table class="table table-striped" style="display: none">
         <thead>
             <tr>
@@ -64,6 +67,7 @@
     function convert_tag(key, value) {
         return `\n            <tr>\n                <th scope="row">\n                    ${key}\n                </th>\n                <td>\n                    ${value.replace("\n", "<br>")}\n</td>\n            </tr>`;
     }
+
     const tbody = document.getElementsByTagName("tbody")[0];
     const submit_button = document.getElementById("submit");
     submit_button.addEventListener("click", function (){
@@ -76,33 +80,44 @@
             document.getElementsByClassName("alert alert-danger")[0].style.visibility = "none";
         }
 
-        $.get(`/profile/${account}`, function (data, err) {
-            if (err) {
-                console.log("Error")
-            }
-
-            if ('error' in data.keys()){
+        $.get(`/profile/${account}`, function (data) {
+            if ((Object.keys(data)).includes("errors")){
                 document.getElementById("username_error").style.display = "";
-                return ""
+                console.log("Wrong Username");
             }else {
                 document.getElementById("username_error").style.display = "none";
-            }
-            let total_data = [];
-            total_data.push(convert_tag("Name", data['name']));
-            total_data.push(convert_tag("Location", data['location']));
-            total_data.push(convert_tag("Description", data['description']));
-            total_data.push(convert_tag("Website Link", `<a href=${data['url']}>${data['entities']}</a>`));
-            total_data.push(convert_tag("Followers Number", String(data['followers_count'])));
-            total_data.push(convert_tag("Created at", data['created_at']));
-            tbody.innerHTML = "";
-            for (const totalDatum of total_data) {
-                tbody.innerHTML += totalDatum;
-            }
-            document.getElementById("profile_div").style.display = ""
-            document.getElementById("banner_div").style.display = ""
-            document.getElementById("")
-        })
+                console.log(data)
+                console.log(Object.keys(data))
 
+                document.getElementById("username_error").style.display = "none";
+                let total_data = [];
+                total_data.push(convert_tag("Name", data['name']));
+                total_data.push(convert_tag("Location", data['location']));
+                total_data.push(convert_tag("Description", data['description']));
+                if (data['url'] == null){
+                    total_data.push(convert_tag("Website Link", `No link available`));
+                }else {
+                    total_data.push(convert_tag("Website Link", `<a href=${data['url']} target="_blank">${data['entities']['url']['urls'][0]['display_url']}</a>`));
+                }
+                total_data.push(convert_tag("Followers Number", String(data['followers_count'])));
+                total_data.push(convert_tag("Created at", data['created_at']));
+                tbody.innerHTML = "";
+                for (const totalDatum of total_data) {
+                    tbody.innerHTML += totalDatum;
+                }
+                document.getElementById("profile_div").style.display = "";
+
+                document.getElementById("profile").src = data['profile_image_url'];
+                if (data['profile_banner_url'] == null){
+                    document.getElementById("banner_div").style.display = "none";
+                }else{
+                    document.getElementById("banner_div").style.display = "";
+                    document.getElementById("banner").src = data['profile_banner_url'];
+                }
+                tbody.parentElement.style.display = "";
+            }
+
+        })
     })
 </script>
 </html>
